@@ -4,66 +4,66 @@ import {
   ArgumentMetadata,
   BadRequestException,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import {
   IsEmail,
   IsString,
   IsStrongPassword,
-  validate,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 
-export class UsersCreateValid {
-  @IsString()
-  name: string;
-
+export class UsersValid {
   @IsEmail()
+  @MaxLength(25)
   email: string;
 
+  @IsString()
+  @MaxLength(20)
   @IsStrongPassword()
   password: string;
-}
-
-
-export class UsersAuthValid {
-  @IsEmail()
-  email: string;
 
   @IsString()
-  password: string;
+  @MinLength(3)
+  @MaxLength(20)
+  name: string;
 }
+
 
 @Injectable()
 export class UserPipe implements PipeTransform {
-  async transform(value: any, metadata: ArgumentMetadata) {
-    if (metadata.metatype === UsersCreateValid) {
-      const object = plainToInstance(UsersCreateValid, value);
-      const errors = await validate(object);
+  async transform(value: UsersValid, metadata: ArgumentMetadata) {
+    const { metatype } = metadata;
 
-      if (errors.length > 0) {
-        throw new BadRequestException(errors);
-      }
+    const object = new metatype();
 
-      return object;
+    const { email, password, name } = value;
+
+    if (!email) {
+      throw new BadRequestException('Email requiered');
+    } else if (email && email.length < 3) {
+      throw new BadRequestException('Email must be at least 3 characters long');
+    } else if (email && email.length > 20) {
+      throw new BadRequestException('Email must be at most 20 characters long');
     }
 
-    return value;
-  }
-}
-
-@Injectable()
-export class UserAuthPipe implements PipeTransform {
-  async transform(value: any, metadata: ArgumentMetadata) {
-    if (metadata.metatype === UsersAuthValid) {
-      const object = plainToInstance(UsersAuthValid, value);
-      const errors = await validate(object);
-
-      if (errors.length > 0) {
-        throw new BadRequestException(errors);
-      }
-
-      return object;
+    if (!password) {
+      throw new BadRequestException('Password requiered');
+    } else if (password && password.length < 6) {
+      throw new BadRequestException('Password must be at least 6 digits long');
+    } else if (password && password.length > 20) {
+      throw new BadRequestException('Password must be at most 20 digits long');
     }
 
-    return value;
+    if (name && name.length < 6) {
+      throw new BadRequestException('Name must be at least 6 characters long');
+    } else if (name && name.length > 20) {
+      throw new BadRequestException('Name must be at most 20 characters long');
+    }
+
+    object.name = name;
+    object.password = password;
+    object.email = email;
+
+    return object;
   }
 }

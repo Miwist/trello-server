@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersEntity } from 'src/entities/users.entity';
+import { UsersEntity } from 'src/utils/entities/users.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { UsersAuthValid, UsersCreateValid } from './usersValid';
+import { UsersValid } from './usersValid';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -14,21 +14,15 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  async findOne(id: any): Promise<UsersEntity> {
-    return this.usersRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
+  async findOne(id: number): Promise<UsersEntity> {
+    return this.usersRepository.findOneBy({ id });
   }
 
   async findAll(): Promise<UsersEntity[]> {
     return this.usersRepository.find();
   }
 
-  async create(createUserDto: UsersCreateValid): Promise<UsersEntity> {
-    console.log(createUserDto.password);
-
+  async createNewUser(createUserDto: UsersValid): Promise<UsersEntity> {
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
@@ -47,7 +41,9 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  async authUser(authuserDto: UsersAuthValid): Promise<{ accessToken: string }> {
+  async authUser(
+    authuserDto: UsersValid,
+  ): Promise<{ accessToken: string }> {
     const user = await this.findByEmail(authuserDto.email);
 
     if (user) {
@@ -56,11 +52,9 @@ export class UsersService {
         user.password,
       );
       if (isValidPassword) {
-        // Генерируем JWT-токен
         const payload = { sub: user.id, email: user.email };
         const accessToken = this.jwtService.sign(payload);
 
-        // Сохраняем токен в БД
         user.token = accessToken;
         await this.usersRepository.save(user);
         return { accessToken };

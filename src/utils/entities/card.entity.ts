@@ -14,7 +14,7 @@ export class CardEntity {
   @ManyToOne(() => ColumnEntity, (column) => column.cards)
   column: ColumnEntity;
 
-  @ManyToOne(() => UsersEntity, (user) => user.cards)
+  @ManyToOne(() => UsersEntity, (user) => user.id)
   user: UsersEntity;
 
   @OneToMany(() => CommentEntity, (comment) => comment.card)

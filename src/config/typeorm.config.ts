@@ -1,9 +1,9 @@
 import { TypeOrmModuleOptions} from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { CardEntity } from 'src/entities/card.entity';
-import { ColumnEntity } from 'src/entities/column.entity';
-import { UsersEntity } from 'src/entities/users.entity';
-import { CommentEntity } from 'src/entities/comment.entity';
+import { CardEntity } from 'src/utils/entities/card.entity';
+import { ColumnEntity } from 'src/utils/entities/column.entity';
+import { UsersEntity } from 'src/utils/entities/users.entity';
+import { CommentEntity } from 'src/utils/entities/comment.entity';
 
 ConfigModule.forRoot();
 

@@ -1,0 +1,126 @@
+import {
+  Controller,
+  Get,
+  Param,
+  NotFoundException,
+  HttpStatus,
+  UsePipes,
+  Post,
+  Body,
+  Delete,
+} from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { CommentPipe } from './commentsValid';
+import { CommentsService } from './comments.service';
+import { CommentEntity } from 'src/utils/entities/comment.entity';
+import { CommentBase } from 'src/swagger/commentsDto';
+
+@ApiTags('Get comments with user ID')
+@Controller('users')
+@UsePipes(new CommentPipe())
+export class getAllComments {
+  constructor(private readonly commentsService: CommentsService) {}
+
+  @Get(':userId/columns/:columnId/cards/:cardId/comments')
+  @ApiOperation({ summary: 'Get comment with user ID and Card ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: CommentBase,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
+  async findAll(
+    @Param('userId') userId: number,
+    @Param('columnId') columnId: number,
+    @Param('cardId') cardId: number,
+  ): Promise<CommentEntity[] | void> {
+    const comments = await this.commentsService.findAll(
+      userId,
+      columnId,
+      cardId,
+    );
+
+    if (!comments) {
+      throw new NotFoundException(`Comments with user ID ${userId} not found`);
+    }
+    return comments;
+  }
+}
+
+@ApiTags('Get comment with user ID and column ID and specified ID')
+@Controller('users')
+@UsePipes(new CommentPipe())
+export class getCommentById {
+  constructor(private readonly commentsService: CommentsService) {}
+
+  @Get(':userId/columns/:columnId/cards/:cardId/comments/:id')
+  async findAll(
+    @Param('userId') userId: number,
+    @Param('columnId') columnId: number,
+    @Param('cardId') cardId: number,
+    @Param('id') commentId: number,
+  ): Promise<CommentEntity[] | void> {
+    const comment = await this.commentsService.findOne(
+      userId,
+      columnId,
+      cardId,
+      commentId,
+    );
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with user ID ${userId} not found`);
+    }
+    return comment;
+  }
+}
+
+@ApiTags('Create comment')
+@Controller('users')
+@UsePipes(new CommentPipe())
+export class createComment {
+  constructor(private readonly commentsService: CommentsService) {}
+  @Post('/columns/cards/comments')
+  @ApiOperation({
+    summary:
+      'Create Comment with user ID and column ID and card ID and specified ID ',
+  })
+  @ApiBody({
+    type: CommentEntity,
+    description: 'Comment data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: CommentBase,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
+  async create(@Body() createColumnDto: CommentEntity): Promise<CommentEntity> {
+    return this.commentsService.createNewComment(createColumnDto);
+  }
+}
+
+@ApiTags('Delete comment')
+@Controller('users')
+export class deleteComment {
+  constructor(private readonly commentsService: CommentsService) {}
+  @Delete(':userId/columns/:coulmnId/cards/:cardId/comments/:commentId')
+  @ApiOperation({ summary: 'Delete Column with user ID and specified ID' })
+  @ApiBody({
+    type: CommentBase,
+    description: 'Comment data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
+  async delete(
+    @Param('userId') userId: number,
+    @Param('columnId') columnId: number,
+    @Param('cardId') cardId: number,
+    @Param('commentId') id: number,
+  ): Promise<string> {
+    return this.commentsService.deleteComment(id, userId, columnId, cardId);
+  }
+}

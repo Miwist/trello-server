@@ -8,7 +8,7 @@ export class ColumnEntity {
   id: number;
 
   @Column()
-  name: string;
+  title: string;
 
   @ManyToOne(() => UsersEntity, (user) => user.columns)
   user: UsersEntity;

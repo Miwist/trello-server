@@ -7,26 +7,26 @@ import {
   UsePipes,
   Post,
   Body,
-  Patch,
 } from '@nestjs/common';
-import { UsersEntity } from 'src/entities/users.entity';
+import { UsersEntity } from 'src/utils/entities/users.entity';
 import { UsersService } from './users.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  UserAuthPipe,
   UserPipe,
-  UsersAuthValid,
-  UsersCreateValid,
+  UsersValid,
 } from './usersValid';
 import { User, UserCreate, UserAuth } from 'src/swagger/userDto';
 
-@ApiTags('users')
+@ApiTags('Get all users')
 @Controller('users')
 @UsePipes(new UserPipe())
 export class getAllUsers {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: [User] })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   async findAll(): Promise<UsersEntity[] | void> {
     const users = await this.usersService.findAll();
     if (!users) {
@@ -36,16 +36,16 @@ export class getAllUsers {
   }
 }
 
-@ApiTags('user')
-@Controller('user')
-export class getUserForId {
+@ApiTags('Get user with specified ID')
+@Controller('users')
+export class getUserById {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get user with specified id' })
+  @ApiOperation({ summary: 'Get user with specified ID' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: User })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async findOne(@Param('id') id: string): Promise<UsersEntity> {
+  async findOne(@Param('id') id: number): Promise<UsersEntity> {
     const user = await this.usersService.findOne(id);
 
     if (!user) {
@@ -57,13 +57,13 @@ export class getUserForId {
 }
 
 @ApiTags('Create user')
-@Controller('auth/register')
+@Controller('auth')
 @UsePipes(new UserPipe())
 export class createUser {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Create user' })
+  @Post('/register')
+  @ApiOperation({ summary: 'Create user with user data' })
   @ApiBody({
     type: UserCreate,
     description: 'User data',
@@ -71,27 +71,27 @@ export class createUser {
 
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: User })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(@Body() createUserDto: UsersCreateValid): Promise<User> {
+  async create(@Body() createUserDto: UsersValid): Promise<User> {
 
-    return this.usersService.create(createUserDto);
+    return this.usersService.createNewUser(createUserDto);
   }
 }
 
 @ApiTags('Auth user')
-@Controller('auth/login')
-@UsePipes(new UserAuthPipe())
+@Controller('auth')
+@UsePipes(new UserPipe())
 export class authUser {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Auth user' })
+  @Post('/login')
+  @ApiOperation({ summary: 'Auth user with email and password' })
   @ApiBody({
     type: UserAuth,
     description: 'User data',
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: User })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async authUser(@Body() authUserDto: UsersAuthValid): Promise<{ accessToken: string }> {
+  async authUser(@Body() authUserDto: UsersValid): Promise<{ accessToken: string }> {
 
     return this.usersService.authUser(authUserDto); 
   }
