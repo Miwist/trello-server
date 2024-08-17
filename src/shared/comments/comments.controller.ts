@@ -119,7 +119,7 @@ export class updateComment {
     type: CommentBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(
+  async update(
     @Body() updateCommentDto: CommentEntity,
   ): Promise<CommentEntity> {
     return this.commentsService.updateComment(updateCommentDto);

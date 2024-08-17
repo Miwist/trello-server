@@ -113,7 +113,7 @@ export class updateColumn {
     type: ColumnBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(
+  async update(
     @Body() updateColumnDto: ColumnBaseWithId,
   ): Promise<ColumnEntity> {
     return this.columnsService.updateColumn(updateColumnDto);

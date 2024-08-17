@@ -87,7 +87,7 @@ export class createCard {
     type: CardBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(@Body() createColumnDto: CardValid): Promise<CardEntity> {
+  async update(@Body() createColumnDto: CardValid): Promise<CardEntity> {
     return this.cardsService.createNewCard(createColumnDto);
   }
 }
