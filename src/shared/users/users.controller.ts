@@ -15,7 +15,7 @@ import {
   UserPipe,
   UsersValid,
 } from './usersValid';
-import { User, UserCreate, UserAuth } from 'src/swagger/userDto';
+import { User, UserCreate, UserAuth } from 'src/swagger/user.dto';
 
 @ApiTags('Get all users')
 @Controller('users')
@@ -36,7 +36,7 @@ export class getAllUsers {
   }
 }
 
-@ApiTags('Get user with specified ID')
+@ApiTags('Get user')
 @Controller('users')
 export class getUserById {
   constructor(private readonly usersService: UsersService) {}
@@ -72,14 +72,12 @@ export class createUser {
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: User })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   async create(@Body() createUserDto: UsersValid): Promise<User> {
-
     return this.usersService.createNewUser(createUserDto);
   }
 }
 
 @ApiTags('Auth user')
 @Controller('auth')
-@UsePipes(new UserPipe())
 export class authUser {
   constructor(private readonly usersService: UsersService) {}
 
@@ -91,7 +89,7 @@ export class authUser {
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'Success', type: User })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async authUser(@Body() authUserDto: UsersValid): Promise<{ accessToken: string }> {
+  async authUser(@Body() authUserDto: UsersValid): Promise<{ accessToken: string } | void> {
 
     return this.usersService.authUser(authUserDto); 
   }

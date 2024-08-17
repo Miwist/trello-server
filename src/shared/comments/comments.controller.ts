@@ -8,15 +8,18 @@ import {
   Post,
   Body,
   Delete,
+  Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CommentPipe } from './commentsValid';
+import { CommentPipe, CommentsValid } from './commentsValid';
 import { CommentsService } from './comments.service';
 import { CommentEntity } from 'src/utils/entities/comment.entity';
-import { CommentBase } from 'src/swagger/commentsDto';
+import { CommentBase } from 'src/swagger/comments.dto';
+import { CanEditCommentGuard } from './comments.guard';
 
-@ApiTags('Get comments with user ID')
+@ApiTags('Get comments')
 @Controller('users')
 @UsePipes(new CommentPipe())
 export class getAllComments {
@@ -32,14 +35,9 @@ export class getAllComments {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   async findAll(
     @Param('userId') userId: number,
-    @Param('columnId') columnId: number,
     @Param('cardId') cardId: number,
   ): Promise<CommentEntity[] | void> {
-    const comments = await this.commentsService.findAll(
-      userId,
-      columnId,
-      cardId,
-    );
+    const comments = await this.commentsService.findAll(userId, cardId);
 
     if (!comments) {
       throw new NotFoundException(`Comments with user ID ${userId} not found`);
@@ -48,24 +46,25 @@ export class getAllComments {
   }
 }
 
-@ApiTags('Get comment with user ID and column ID and specified ID')
+@ApiTags('Get comment')
 @Controller('users')
 @UsePipes(new CommentPipe())
 export class getCommentById {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':userId/columns/:columnId/cards/:cardId/comments/:id')
+  @ApiOperation({
+    summary: 'Get comment with user ID and Card ID and specified ID',
+  })
   async findAll(
     @Param('userId') userId: number,
     @Param('columnId') columnId: number,
     @Param('cardId') cardId: number,
-    @Param('id') commentId: number,
-  ): Promise<CommentEntity[] | void> {
+  ): Promise<CommentEntity | void> {
     const comment = await this.commentsService.findOne(
       userId,
       columnId,
       cardId,
-      commentId,
     );
 
     if (!comment) {
@@ -86,7 +85,7 @@ export class createComment {
       'Create Comment with user ID and column ID and card ID and specified ID ',
   })
   @ApiBody({
-    type: CommentEntity,
+    type: CommentBase,
     description: 'Comment data',
   })
   @ApiResponse({
@@ -95,8 +94,35 @@ export class createComment {
     type: CommentBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(@Body() createColumnDto: CommentEntity): Promise<CommentEntity> {
-    return this.commentsService.createNewComment(createColumnDto);
+  async create(@Body() createCommentDto: CommentsValid): Promise<CommentEntity> {
+    return this.commentsService.createNewComment(createCommentDto);
+  }
+}
+
+@ApiTags('Update comment')
+@Controller('users')
+@UsePipes(new CommentPipe())
+export class updateComment {
+  constructor(private readonly commentsService: CommentsService) {}
+  @Patch('/columns/cards/comments')
+  @UseGuards(CanEditCommentGuard)
+  @ApiOperation({
+    summary: 'Update Comment with specified ID ',
+  })
+  @ApiBody({
+    type: CommentBase,
+    description: 'Comment data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: CommentBase,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
+  async create(
+    @Body() updateCommentDto: CommentEntity,
+  ): Promise<CommentEntity> {
+    return this.commentsService.updateComment(updateCommentDto);
   }
 }
 
@@ -105,6 +131,7 @@ export class createComment {
 export class deleteComment {
   constructor(private readonly commentsService: CommentsService) {}
   @Delete(':userId/columns/:coulmnId/cards/:cardId/comments/:commentId')
+  @UseGuards(CanEditCommentGuard)
   @ApiOperation({ summary: 'Delete Column with user ID and specified ID' })
   @ApiBody({
     type: CommentBase,
@@ -117,10 +144,9 @@ export class deleteComment {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
   async delete(
     @Param('userId') userId: number,
-    @Param('columnId') columnId: number,
     @Param('cardId') cardId: number,
     @Param('commentId') id: number,
   ): Promise<string> {
-    return this.commentsService.deleteComment(id, userId, columnId, cardId);
+    return this.commentsService.deleteComment(id, userId, cardId);
   }
 }

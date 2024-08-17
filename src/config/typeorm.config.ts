@@ -17,8 +17,3 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   entities: [UsersEntity, ColumnEntity, CardEntity, CommentEntity],
   synchronize: true,
 };
-
-
-
-
-

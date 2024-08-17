@@ -8,20 +8,27 @@ import {
   Post,
   Body,
   Delete,
+  UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ColumnsService } from './columns.service';
 import { ColumnEntity } from 'src/utils/entities/column.entity';
 import { ColumnPipe } from './columnsValid';
-import { ColumnBase, ColumnBaseWithId, ColumnId } from 'src/swagger/columnsDto';
+import {
+  ColumnBase,
+  ColumnBaseWithId,
+  ColumnId,
+} from 'src/swagger/columns.dto';
+import { CanEditColumnGuard } from './columns.guard';
 
-@ApiTags('Get columns with user ID')
+@ApiTags('Get columns')
 @Controller('users')
 export class getAllColumns {
   constructor(private readonly columnsService: ColumnsService) {}
 
   @Get(':userId/columns/')
-  @ApiOperation({ summary: 'Get column with specified ID' })
+  @ApiOperation({ summary: 'Get columns with user ID' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Success',
@@ -44,22 +51,23 @@ export class getAllColumns {
   }
 }
 
-@ApiTags('Get column with specified ID')
+@ApiTags('Get column')
 @Controller('users')
 export class getColumnsById {
   constructor(private readonly columnsService: ColumnsService) {}
 
   @Get(':userId/columns/:columnId')
+  @ApiOperation({ summary: 'Get column with specified ID' })
   async findAll(
     @Param('userId') userId: number,
     @Param('columnId') columnId: number,
-  ): Promise<ColumnEntity[] | void> {
-    const columns = await this.columnsService.findOne(userId, columnId);
+  ): Promise<ColumnEntity | void> {
+    const column = await this.columnsService.findOne(userId, columnId);
 
-    if (!columns) {
+    if (!column) {
       throw new NotFoundException(`Columns with user ID ${userId} not found`);
     }
-    return columns;
+    return column;
   }
 }
 
@@ -87,11 +95,37 @@ export class createColumn {
   }
 }
 
+@ApiTags('Update column')
+@Controller('users')
+@UsePipes(new ColumnPipe())
+export class updateColumn {
+  constructor(private readonly columnsService: ColumnsService) {}
+  @Patch('/columns/')
+  @UseGuards(CanEditColumnGuard)
+  @ApiOperation({ summary: 'Update Column with user ID' })
+  @ApiBody({
+    type: ColumnBase,
+    description: 'Column data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: ColumnBase,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
+  async create(
+    @Body() updateColumnDto: ColumnBaseWithId,
+  ): Promise<ColumnEntity> {
+    return this.columnsService.updateColumn(updateColumnDto);
+  }
+}
+
 @ApiTags('Delete column')
 @Controller('users')
 export class deleteColumn {
   constructor(private readonly columnsService: ColumnsService) {}
   @Delete(':userId/columns/:columnId')
+  @UseGuards(CanEditColumnGuard)
   @ApiOperation({ summary: 'Delete Column with user ID and specified ID' })
   @ApiBody({
     type: ColumnId,

@@ -10,7 +10,7 @@ export class ColumnEntity {
   @Column()
   title: string;
 
-  @ManyToOne(() => UsersEntity, (user) => user.columns)
+  @ManyToOne(() => UsersEntity, (user) => user.id)
   user: UsersEntity;
 
   @OneToMany(() => CardEntity, (card) => card.column)

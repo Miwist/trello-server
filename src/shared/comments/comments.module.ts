@@ -8,6 +8,7 @@ import {
   deleteComment,
   getAllComments,
   getCommentById,
+  updateComment,
 } from './comments.controller';
 import { CardEntity } from 'src/utils/entities/card.entity';
 
@@ -17,7 +18,7 @@ import { CardEntity } from 'src/utils/entities/card.entity';
     TypeOrmModule.forFeature([CommentEntity]),
     TypeOrmModule.forFeature([CardEntity]),
   ],
-  controllers: [getAllComments, getCommentById, createComment, deleteComment],
+  controllers: [getAllComments, getCommentById, createComment, deleteComment, updateComment],
   providers: [CommentsService],
 })
 export class CommentsModule {}

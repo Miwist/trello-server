@@ -22,10 +22,6 @@ export class CommentsValid {
 
   @IsNumber()
   @MaxLength(10)
-  columnId: number;
-
-  @IsNumber()
-  @MaxLength(10)
   id: number;
 }
 
@@ -36,7 +32,7 @@ export class CommentPipe implements PipeTransform {
 
     const object = new metatype();
 
-    const { content, userId, cardId, id, columnId } = value;
+    const { content, userId, cardId } = value;
 
     if (!content) {
       throw new BadRequestException('Content requiered');
@@ -52,14 +48,9 @@ export class CommentPipe implements PipeTransform {
       throw new BadRequestException('User ID requiered');
     }
 
-    if (!columnId) {
-      throw new BadRequestException('Column ID requiered');
-    }
-
     object.content = content;
     object.userId = userId;
     object.cardId = cardId;
-    object.id = id;
 
     return object;
   }

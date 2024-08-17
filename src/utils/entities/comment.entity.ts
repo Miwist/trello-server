@@ -11,12 +11,9 @@ export class CommentEntity {
   @Column()
   content: string;
 
-  @ManyToOne(() => CardEntity, (card) => card.comments)
+  @ManyToOne(() => CardEntity, (card) => card.id)
   card: CardEntity;
 
   @ManyToOne(() => UsersEntity, (user) => user.id)
   user: CardEntity;
-
-  @ManyToOne(() => ColumnEntity, (column) => column.id)
-  column: CardEntity;
 }

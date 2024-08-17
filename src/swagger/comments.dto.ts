@@ -10,9 +10,6 @@ export class CommentBase {
   @ApiProperty({ description: 'Comment ID', nullable: false })
   commentId: number;
 
-  @ApiProperty({ description: 'Column ID', nullable: false })
-  columnId: number;
-
   @ApiProperty({ description: 'Card ID', nullable: false })
   cardId: number;
 }

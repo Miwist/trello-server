@@ -11,12 +11,12 @@ export class CardEntity {
   @Column()
   title: string;
 
-  @ManyToOne(() => ColumnEntity, (column) => column.cards)
+  @ManyToOne(() => ColumnEntity, (column) => column.id)
   column: ColumnEntity;
 
   @ManyToOne(() => UsersEntity, (user) => user.id)
   user: UsersEntity;
 
-  @OneToMany(() => CommentEntity, (comment) => comment.card)
+  @OneToMany(() => CommentEntity, (comment) => comment.id)
   comments: CommentEntity[];
 }

@@ -10,7 +10,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { ColumnBaseWithId } from 'src/swagger/columnsDto';
+import { ColumnBaseWithId } from 'src/swagger/columns.dto';
 
 export class ColumnValid {
   @IsString()

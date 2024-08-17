@@ -3,10 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './config/typeorm.config';
-import { UsersModule } from './models/users/users.module';
-import { ColumnModule } from './models/columns/columns.module';
-import { CardsModule } from './models/cards/cards.module';
-import { CommentEntity } from './utils/entities/comment.entity';
+import { UsersModule } from './shared/users/users.module';
+import { ColumnModule } from './shared/columns/columns.module';
+import { CardsModule } from './shared/cards/cards.module';
+import { CommentsModule } from './shared/comments/comments.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { CommentEntity } from './utils/entities/comment.entity';
     UsersModule,
     ColumnModule,
     CardsModule,
-    CommentEntity,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
