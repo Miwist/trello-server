@@ -53,7 +53,7 @@ export class getCommentById {
   @Get(':userId/columns/:columnId/cards/:cardId/comments/:id')
   @UseGuards(CanEditCommentGuard)
   @ApiOperation({
-    summary: 'Get comment with user ID and Card ID and specified ID',
+    summary: 'Get comment with specified ID',
   })
   async findAll(
     @Param('commentId') id: number,
@@ -130,7 +130,7 @@ export class deleteComment {
   constructor(private readonly commentsService: CommentsService) {}
   @Delete(':userId/columns/:coulmnId/cards/:cardId/comments/:commentId')
   @UseGuards(CanEditCommentGuard)
-  @ApiOperation({ summary: 'Delete Column with user ID and specified ID' })
+  @ApiOperation({ summary: 'Delete Comment with user ID and specified ID' })
   @ApiBody({
     type: CommentBase,
     description: 'Comment data',

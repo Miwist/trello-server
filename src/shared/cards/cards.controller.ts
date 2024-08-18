@@ -22,7 +22,7 @@ import { CanEditCardGuard } from './cards.guard';
 @ApiTags('Get cards')
 @Controller('users')
 export class getAllCards {
-  constructor(private readonly columnsService: CardsService) {}
+  constructor(private readonly cardsService: CardsService) {}
 
   @Get(':userId/columns/:columnId/cards/')
   @ApiOperation({ summary: 'Get cards with user ID and specified ID' })
@@ -36,12 +36,12 @@ export class getAllCards {
     @Param('userId') userId: number,
     @Param('columnId') columnId: number,
   ): Promise<CardEntity[] | void> {
-    const columns = await this.columnsService.findAll(userId, columnId);
+    const cards = await this.cardsService.findAll(userId, columnId);
 
-    if (!columns) {
-      throw new NotFoundException(`Columns with user ID ${userId} not found`);
+    if (!cards) {
+      throw new NotFoundException(`Cards with user ID ${userId} not found`);
     }
-    return columns;
+    return cards;
   }
 }
 
@@ -87,8 +87,8 @@ export class createCard {
     type: CardBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async update(@Body() createColumnDto: CardValid): Promise<CardEntity> {
-    return this.cardsService.createNewCard(createColumnDto);
+  async update(@Body() createCardDto: CardValid): Promise<CardEntity> {
+    return this.cardsService.createNewCard(createCardDto);
   }
 }
 
@@ -123,10 +123,10 @@ export class deleteCard {
   constructor(private readonly cardsService: CardsService) {}
   @Delete(':userId/columns/:coulmnId/cards/:cardId')
   @UseGuards(CanEditCardGuard)
-  @ApiOperation({ summary: 'Delete Column with user ID and specified ID' })
+  @ApiOperation({ summary: 'Delete Card with user ID and specified ID' })
   @ApiBody({
     type: CardId,
-    description: 'Column data',
+    description: 'Card data',
   })
   @ApiResponse({
     status: HttpStatus.OK,
