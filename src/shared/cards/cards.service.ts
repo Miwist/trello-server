@@ -20,22 +20,6 @@ export class CardsService {
     private readonly columnsRepository: Repository<ColumnEntity>,
   ) {}
 
-  async findOne(
-    userId: number,
-    cardId: number,
-    columnId: number,
-  ): Promise<CardEntity> {
-    return this.cardsRepository.findOneBy({
-      user: {
-        id: userId,
-      },
-      column: {
-        id: columnId,
-      },
-      id: cardId,
-    });
-  }
-
   async findOneColumn(userId: number, columnId: number): Promise<ColumnEntity> {
     return this.columnsRepository.findOneBy({
       user: {
@@ -45,20 +29,32 @@ export class CardsService {
     });
   }
   async findCardById(cardId: number): Promise<CardEntity> {
+    return this.cardsRepository.findOneBy({
+      id: cardId,
+    });
+  }
+
+  async findCardWithUser(cardId: number): Promise<CardEntity> {
     return this.cardsRepository.findOne({
       where: { id: cardId },
       relations: ['user'],
     });
   }
+
   async findAll(userId: number, columnId: number): Promise<CardEntity[]> {
-    return this.cardsRepository.find({
-      where: {
-        user: {
-          id: userId,
+    try {
+      return this.cardsRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+          column: { id: columnId },
         },
-        column: { id: columnId },
-      },
-    });
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Error getting cards', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createNewCard(createCardDto: CardValid): Promise<CardEntity> {
@@ -105,15 +101,11 @@ export class CardsService {
   }
 
   async deleteCard(
-    userId: number,
-    columnId: number,
     id: number,
   ): Promise<string> {
     try {
       await this.cardsRepository.delete({
         id,
-        user: { id: userId },
-        column: { id: columnId },
       });
       return `Card with ID ${id} success delete`;
     } catch (e) {

@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { CardsService } from './cards.service';
 
@@ -9,14 +9,19 @@ export class CanEditCardGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const cardId = context.switchToHttp().getRequest().params.cardId;
-    const userId = +context.switchToHttp().getRequest().params.userId;
+    const data = context.switchToHttp().getRequest();
+    const cardId = data.params.cardId ?? data.body.cardId;
+    const userId = data.params.userId ?? data.body.userId;
 
-    return this.cardService.findCardById(cardId).then((card) => {
-      if (card && card.user && userId === card.user.id) {
-        return true;
+    return this.cardService.findCardWithUser(cardId).then((card) => {
+      if (card) {
+        if (card.user && parseFloat(userId) === card.user.id) {
+          return true;
+        } else {
+          return false;
+        }
       } else {
-        return false;
+        throw new HttpException('Card not found', HttpStatus.BAD_REQUEST);
       }
     });
   }

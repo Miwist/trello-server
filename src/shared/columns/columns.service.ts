@@ -21,15 +21,26 @@ export class ColumnsService {
   ) {}
 
   async findOne(userId: number, columnId: number): Promise<ColumnEntity> {
-    return this.columnsRepository.findOneBy({
-      user: {
-        id: userId,
-      },
+    try {
+      return this.columnsRepository.findOneBy({
+        user: {
+          id: userId,
+        },
+        id: columnId,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Error getting one column', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async findColumnById(columnId: number): Promise<ColumnEntity> {
+    return await this.columnsRepository.findOneBy({
       id: columnId,
     });
   }
 
-  async findColumnById(columnId: number): Promise<ColumnEntity> {
+  async findColumnWithUser(columnId: number): Promise<ColumnEntity> {
     return await this.columnsRepository.findOne({
       where: { id: columnId },
       relations: ['user'],
@@ -43,13 +54,18 @@ export class ColumnsService {
   }
 
   async findAll(userId: number): Promise<ColumnEntity[]> {
-    return this.columnsRepository.find({
-      where: {
-        user: {
-          id: userId,
+    try {
+      return this.columnsRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
         },
-      },
-    });
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Error getting columns', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createNewColumn(

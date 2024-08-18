@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ColumnsService } from './columns.service';
 
@@ -9,14 +15,19 @@ export class CanEditColumnGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const columnId = context.switchToHttp().getRequest().params.columnId;
-    const userId = +context.switchToHttp().getRequest().params.userId;
+    const data = context.switchToHttp().getRequest();
+    const columnId = data.params.columnId ?? data.body.columnId;
+    const userId = data.params.userId ?? data.body.userId;
 
-    return this.columnService.findColumnById(columnId).then((column) => {
-      if (column && column.user && userId === column.user.id) {
-        return true;
+    return this.columnService.findColumnWithUser(columnId).then((column) => {
+      if (column) {
+        if (column.user && parseFloat(userId) === column.user.id) {
+          return true;
+        } else {
+          return false;
+        }
       } else {
-        return false;
+        throw new HttpException('Column not found', HttpStatus.BAD_REQUEST);
       }
     });
   }

@@ -38,8 +38,15 @@ export class UserPipe implements PipeTransform {
 
     const { email, password, name } = value;
 
+    const validateEmail = (email: string): boolean => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
     if (!email) {
       throw new BadRequestException('Email requiered');
+    } else if (!validateEmail(email)) {
+      throw new BadRequestException('Incorrect email');
     } else if (email && email.length < 3) {
       throw new BadRequestException('Email must be at least 3 characters long');
     } else if (email && email.length > 20) {
@@ -67,3 +74,4 @@ export class UserPipe implements PipeTransform {
     return object;
   }
 }
+

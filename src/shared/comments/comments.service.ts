@@ -20,22 +20,6 @@ export class CommentsService {
     private readonly cardsRepository: Repository<CardEntity>,
   ) {}
 
-  async findOne(
-    userId: number,
-    cardId: number,
-    id: number,
-  ): Promise<CommentEntity> {
-    return this.commentsRepository.findOneBy({
-      user: {
-        id: userId,
-      },
-      card: {
-        id: cardId,
-      },
-      id: id,
-    });
-  }
-
   async findOneCard(userId: number, cardId: number): Promise<CardEntity> {
     return this.cardsRepository.findOneBy({
       user: {
@@ -45,7 +29,18 @@ export class CommentsService {
     });
   }
 
-  async findCommentById(id: number): Promise<CardEntity> {
+  async findCommentById(id: number): Promise<CommentEntity> {
+    try {
+      return this.commentsRepository.findOneBy({
+        id: id,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Error getting comment', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async findCommentWithUser(id: number): Promise<CardEntity> {
     return this.cardsRepository.findOne({
       where: { id: id },
       relations: ['user'],
@@ -53,16 +48,21 @@ export class CommentsService {
   }
 
   async findAll(userId: number, cardId: number): Promise<CommentEntity[]> {
-    return this.commentsRepository.find({
-      where: {
-        user: {
-          id: userId,
+    try {
+      return this.commentsRepository.find({
+        where: {
+          user: {
+            id: userId,
+          },
+          card: {
+            id: cardId,
+          },
         },
-        card: {
-          id: cardId,
-        },
-      },
-    });
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Error getting comments', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createNewComment(

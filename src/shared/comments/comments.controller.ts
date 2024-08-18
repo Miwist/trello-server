@@ -21,7 +21,6 @@ import { CanEditCommentGuard } from './comments.guard';
 
 @ApiTags('Get comments')
 @Controller('users')
-@UsePipes(new CommentPipe())
 export class getAllComments {
   constructor(private readonly commentsService: CommentsService) {}
 
@@ -48,29 +47,26 @@ export class getAllComments {
 
 @ApiTags('Get comment')
 @Controller('users')
-@UsePipes(new CommentPipe())
 export class getCommentById {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':userId/columns/:columnId/cards/:cardId/comments/:id')
+  @UseGuards(CanEditCommentGuard)
   @ApiOperation({
     summary: 'Get comment with user ID and Card ID and specified ID',
   })
   async findAll(
-    @Param('userId') userId: number,
-    @Param('columnId') columnId: number,
-    @Param('cardId') cardId: number,
+    @Param('commentId') id: number,
   ): Promise<CommentEntity | void> {
-    const comment = await this.commentsService.findOne(
-      userId,
-      columnId,
-      cardId,
-    );
+    const comment = await this.commentsService.findCommentById(id);
 
     if (!comment) {
-      throw new NotFoundException(`Comment with user ID ${userId} not found`);
+      throw new NotFoundException(
+        `Comment with user ID ${id} not found`,
+      );
+    } else {
+      return comment;
     }
-    return comment;
   }
 }
 
@@ -94,7 +90,9 @@ export class createComment {
     type: CommentBase,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Bad Request' })
-  async create(@Body() createCommentDto: CommentsValid): Promise<CommentEntity> {
+  async create(
+    @Body() createCommentDto: CommentsValid,
+  ): Promise<CommentEntity> {
     return this.commentsService.createNewComment(createCommentDto);
   }
 }

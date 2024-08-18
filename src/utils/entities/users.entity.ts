@@ -20,12 +20,12 @@ export class UsersEntity {
   @Column({ nullable: true, unique: true })
   token: string;
 
-  @OneToMany(() => ColumnEntity, (column) => column.user)
+  @OneToMany(() => ColumnEntity, (column) => column.id)
   columns: ColumnEntity[];
 
-  @OneToMany(() => CardEntity, (card) => card.user)
+  @OneToMany(() => CardEntity, (card) => card.id)
   cards: CardEntity[];
 
-  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  @OneToMany(() => CommentEntity, (comment) => comment.id)
   comments: CommentEntity[];
 }
